@@ -1,0 +1,7 @@
+django
+graphene-django
+confluent_kafka
+celery
+psycopg2-binary
+django-extensions
+python-decouple

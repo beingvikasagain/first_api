@@ -1,0 +1,60 @@
+version: '3'
+
+services:
+  rabbitmqserver:
+    image: rabbitmq:3.9.27-management
+    container_name: rabbitmq_test
+    environment:
+      - RABBITMQ_DEFAULT_USER=root
+      - RABBITMQ_DEFAULT_PASS=root
+    volumes:
+      - rabbit_volume:/var/lib/rabbitmq
+    ports:
+      # - "5672:5672"
+      - "15671:15671"
+      - "15692:15692"
+      - "15672:15672"
+      - "15691:15691"
+      # - "25672:25672"
+      # - "4369:4369"
+      - "5671:5671"
+
+  database:
+    image: postgres
+    container_name: postgres_db
+    environment:
+      - POSTGRES_PASSWORD=celery
+      - POSTGRES_DB=celery_test
+      - POSTGRES_USER=celery
+    ports:
+      - "5431:5432"
+    volumes:
+      - celery_test:/var/lib/postgresql/data
+
+  celery:
+    image: vikas
+    container_name: celery01
+    # environment:
+    #   - C_FORCE_ROOT=True
+    command: celery -A celery01 worker -Q testq -c 4 --loglevel=info
+    volumes:
+      - .:/celerytest
+    depends_on:
+      - database
+      - rabbitmqserver
+
+  django:
+    image: vikas
+    container_name: celery01_django
+    command: python manage.py runserver 0.0.0.0:8080
+    volumes:
+      - .:/celerytest
+    ports:
+      - "5678:8080"
+    depends_on:
+      - database
+    restart: always
+
+volumes:
+  rabbit_volume:
+  celery_test:

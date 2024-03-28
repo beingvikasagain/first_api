@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  database:
+    image: postgres
+    container_name: postgres_db
+    environment:
+      - POSTGRES_PASSWORD=redis
+      - POSTGRES_DB=redis_db
+      - POSTGRES_USER=redis
+    ports:
+      - "5431:5432"
+    volumes:
+      - graphql_db:/var/lib/postgresql/data
+    
+  celery:
+    image: vikas
+    container_name: celery_graphql01
+    command: celery -A graphql01 worker -Q test_queue -c 4 --loglevel=info
+    volumes:
+      - .:/graphql
+    depends_on:
+      - database
+
+volumes:
+  graphql_db:
+
+
+    
